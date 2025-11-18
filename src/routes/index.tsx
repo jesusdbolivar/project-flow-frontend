@@ -2,7 +2,10 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Dashboard } from '@/pages/Dashboard';
-import { FormsListPage, FormEditPage } from '@/pages/settings';
+import {
+  FormEditPage,
+  FormsListPage,
+} from '@/pages/settings';
 
 export const router = createBrowserRouter([
   {

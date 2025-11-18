@@ -1,5 +1,5 @@
 // Forms module
-export { FormsListPage, FormEditPage } from './forms';
+export { FormEditPage, FormsListPage } from './forms';
 
 // Aquí puedes agregar más módulos de settings:
 // export { UsersListPage, UserEditPage } from './users';

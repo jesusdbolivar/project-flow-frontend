@@ -23,7 +23,6 @@ export const sidebarItems: SidebarItem[] = [
     title: "Dashboard",
     url: "/",
     icon: Home,
-    isActive: true,
   },
   {
     title: "Configuración",

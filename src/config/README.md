@@ -13,7 +13,6 @@ interface SidebarItem {
   title: string;           // Nombre que aparece en el menú
   url: string;             // Ruta de navegación
   icon: LucideIcon;        // Componente de icono de lucide-react
-  isActive?: boolean;      // Si está activo por defecto (para collapsibles)
   badge?: string;          // Texto para mostrar badge (ej: "3", "Nuevo")
   items?: SidebarSubItem[]; // Sub-items (crea un menú desplegable)
 }
@@ -23,6 +22,8 @@ interface SidebarSubItem {
   url: string;    // Ruta de navegación
 }
 ```
+
+> **Nota:** El estado activo (`isActive`) se maneja automáticamente según la ruta actual. No necesitas configurarlo manualmente.
 
 ### Ejemplo completo:
 
@@ -50,7 +51,6 @@ export const sidebarItems: SidebarItem[] = [
     title: "Proyectos",
     url: "/projects",
     icon: FolderKanban,
-    isActive: true, // Expandido por defecto
     items: [
       {
         title: "Todos los proyectos",

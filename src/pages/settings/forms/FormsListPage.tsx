@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -9,7 +10,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-export function FormsPage() {
+export function FormsListPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -36,7 +39,11 @@ export function FormsPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">5 campos</span>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/settings/forms/1/edit')}
+              >
                 Editar
               </Button>
             </div>
@@ -53,7 +60,11 @@ export function FormsPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">8 campos</span>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/settings/forms/2/edit')}
+              >
                 Editar
               </Button>
             </div>
@@ -70,7 +81,11 @@ export function FormsPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">3 campos</span>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/settings/forms/3/edit')}
+              >
                 Editar
               </Button>
             </div>

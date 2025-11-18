@@ -7,16 +7,27 @@ Esta carpeta contiene todas las páginas/vistas de la aplicación organizadas po
 ```
 pages/
 ├── Dashboard.tsx           # Página principal del dashboard
-└── settings/              # Módulo de configuración
-    └── Forms.tsx          # Página de gestión de formularios
+├── README.md              # Este archivo
+│
+└── settings/              # 📂 Módulo de configuración (modular)
+    ├── index.ts           # Exports de todos los submódulos
+    ├── README.md          # Documentación del módulo
+    │
+    └── forms/             # Submódulo de formularios
+        ├── index.ts
+        ├── FormsListPage.tsx
+        ├── FormEditPage.tsx
+        └── README.md
 ```
 
 ## Convenciones
 
-### Organización
-- Cada página debe ser un componente exportado con un nombre descriptivo
-- Páginas relacionadas deben agruparse en carpetas por módulo
-- Los archivos de página deben usar PascalCase (ej: `Dashboard.tsx`, `Forms.tsx`)
+### Organización modular
+- **Páginas simples** → Archivo directo (ej: `Dashboard.tsx`)
+- **Módulos complejos** → Carpeta con submódulos (ej: `settings/`)
+- **Submódulos** → Carpeta con páginas relacionadas (ej: `settings/forms/`)
+- Los archivos de página deben usar PascalCase terminando en `Page` (ej: `FormsListPage.tsx`)
+- Cada módulo/submódulo tiene su `index.ts` y `README.md`
 
 ### Estructura de una página
 
@@ -44,10 +55,34 @@ export function NombrePagina() {
 
 ## Agregar una nueva página
 
-### 1. Crear el archivo de la página
+### Opción A: Página simple (no requiere submódulo)
 
 ```bash
-# Para una página de módulo existente
+# Para una página independiente
+src/pages/NuevaPagina.tsx
+```
+
+### Opción B: Página dentro de un submódulo existente
+
+```bash
+# Para settings/forms
+src/pages/settings/forms/NuevaPagina.tsx
+
+# Luego exportar en:
+src/pages/settings/forms/index.ts
+src/pages/settings/index.ts
+```
+
+### Opción C: Crear un nuevo submódulo completo
+
+```bash
+# Crear estructura
+src/pages/settings/nuevo-modulo/
+├── index.ts
+├── NuevoModuloListPage.tsx
+├── NuevoModuloEditPage.tsx
+└── README.md
+```
 src/pages/settings/NuevaPagina.tsx
 
 # Para un nuevo módulo

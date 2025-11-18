@@ -7,13 +7,16 @@ Esta carpeta contiene los componentes de diseño principal de la aplicación.
 ### `app-sidebar.tsx`
 Componente principal del sidebar que renderiza el menú de navegación usando la configuración desde `sidebar.config.ts`.
 
-**Características:**
-- Sidebar colapsable con animaciones
-- Soporte para items con sub-menús
-- Header con logo y nombre de la aplicación
-- Footer con información del usuario y menú dropdown
-- Tooltips en modo colapsado
-- Responsive (se convierte en drawer en móvil)
+## Características implementadas
+
+- ✅ **Sidebar colapsable** con animaciones
+- ✅ **Soporte para items con sub-menús**
+- ✅ **Detección automática de ruta activa** - Los items se resaltan según la URL actual
+- ✅ **Apertura automática de sub-menús** - Si un sub-item está activo, el menú padre se abre automáticamente
+- ✅ **Header** con logo y nombre de la aplicación
+- ✅ **Footer** con información del usuario y menú dropdown
+- ✅ **Tooltips** en modo colapsado
+- ✅ **Responsive** (se convierte en drawer en móvil)
 
 ### `app-layout.tsx`
 Layout principal que envuelve el contenido de la aplicación.

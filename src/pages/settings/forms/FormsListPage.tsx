@@ -1,3 +1,8 @@
+import {
+  useEffect,
+  useState,
+} from 'react';
+
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,9 +14,29 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  createForm,
+  type FormSummary,
+  listForms,
+} from '@/services/forms.api';
 
 export function FormsListPage() {
   const navigate = useNavigate();
+  const [forms, setForms] = useState<FormSummary[]>([]);
+  const [loading, SetLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    listForms()
+      .then(setForms)
+      .catch(()=> setError('No se pudieron cargar los formularios'))
+      .finally(() => SetLoading(false));
+  }, []);
+
+  const handleCreate = async() => {
+    const nuevo = await createForm({title: 'Nuevo formulario'});
+    setForms(prev => [nuevo, ...prev])
+  }
 
   return (
     <div className="space-y-6">
@@ -22,76 +47,43 @@ export function FormsListPage() {
             Gestiona y configura los formularios de tu aplicación
           </p>
         </div>
-        <Button>
+        <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Formulario
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Formulario de Contacto</CardTitle>
-            <CardDescription>
-              Formulario principal para contacto de clientes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">5 campos</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/settings/forms/1/edit')}
-              >
-                Editar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      {loading && <p className="text-sm text-muted-foreground">Cargando...</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Registro de Usuario</CardTitle>
-            <CardDescription>
-              Formulario para registro de nuevos usuarios
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">8 campos</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/settings/forms/2/edit')}
-              >
-                Editar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Feedback</CardTitle>
-            <CardDescription>
-              Formulario de feedback de usuarios
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">3 campos</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/settings/forms/3/edit')}
-              >
-                Editar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {!loading && !error && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {forms.map(form => (
+            <Card key={form.id}>
+              <CardHeader>
+                <CardTitle>{form.title}</CardTitle>
+                {form.description && (
+                  <CardDescription>{form.description}</CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    ID: {form.id}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/settings/forms/${form.id}/edit`)}
+                  >
+                    Editar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card>
         <CardHeader>

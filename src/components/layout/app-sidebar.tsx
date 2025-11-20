@@ -88,7 +88,7 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
                         defaultOpen={shouldBeOpen}
                         className="group/collapsible"
                       >
-                        <>
+                        <div>
                           <CollapsibleTrigger asChild>
                             <SidebarMenuButton 
                               tooltip={item.title}
@@ -115,7 +115,7 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
                               ))}
                             </SidebarMenuSub>
                           </CollapsibleContent>
-                        </>
+                        </div>
                       </Collapsible>
                     ) : (
                       <SidebarMenuButton 

@@ -111,6 +111,9 @@ Separación aplicada:
 - `useFormsStore` → Sólo metadatos (id, title, description, updatedAt). No maneja campos.
 - `useFormBuilderStore` → Maneja `currentForm` (detalles + fields) y operaciones: `loadForm`, `addField`, `updateField`, `removeField`, `reorderFields`, `replaceSchema`, `setLocalFields`.
 
+El componente `FormBuilder` ahora recibe `formId` y se conecta directamente al store para persistir acciones (creación, edición, reorden, eliminación) contra la API mock de FormBuilder con UI optimista.
+Se separó la lógica (contenedor `FormBuilder` que maneja estados: loading, notFound, error) de la presentación (`FormBuilderView`). El store expone `notFound` y `resetError` para una UX controlada sin overlays intrusivos.
+
 Esto reduce acoplamiento y permite escalar validaciones y lógica específica del builder sin inflar el store de formularios global.
 - [x] **Módulo Forms:**
     - [x] Listado de formularios.

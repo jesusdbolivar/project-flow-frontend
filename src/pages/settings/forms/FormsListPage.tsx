@@ -18,7 +18,7 @@ export function FormsListPage() {
 
   return (
     <div className="space-y-6">
-    <FormsHeader action={<FormCreateModal onCreated={appendForm} />} />
+  <FormsHeader action={<FormCreateModal onCreated={(form) => { appendForm(form); navigate(`/settings/forms/${form.id}/edit`); }} />} />
 
       {loading && <p className="text-sm text-muted-foreground">Cargando...</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}

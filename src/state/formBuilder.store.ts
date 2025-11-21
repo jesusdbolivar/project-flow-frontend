@@ -4,25 +4,21 @@ import { persist } from 'zustand/middleware';
 import type { FormField } from '@/pages/settings/forms/FormBuilder/types';
 import type { FormDetails } from '@/services/form-builder.api';
 import {
-  addFormField,
-  deleteFormField,
   getFormDetails,
-  reorderFormFields,
   replaceFormSchema,
-  updateFormField,
 } from '@/services/form-builder.api';
 
 interface FormBuilderState {
   currentForm: FormDetails | null;
   loading: boolean;
   error: string | null;
+  notFound: boolean;
+  dirty: boolean; // cambios locales sin guardar
   loadForm: (id: string) => Promise<void>;
-  addField: (field: Omit<FormField, 'id'>) => Promise<FormField | null>;
-  updateField: (fieldId: string, data: Partial<FormField>) => Promise<FormField | null>;
-  removeField: (fieldId: string) => Promise<boolean>;
-  reorderFields: (orderedIds: string[]) => Promise<FormField[] | null>;
   replaceSchema: (schema: { title: string; description?: string; fields: FormField[] }) => Promise<FormDetails | null>;
-  setLocalFields: (fields: FormField[]) => void; // para edición local antes de persistir
+  setLocalFields: (fields: FormField[]) => void;
+  resetError: () => void;
+  resetDirty: () => void;
 }
 
 export const useFormBuilderStore = create<FormBuilderState>()(
@@ -31,66 +27,19 @@ export const useFormBuilderStore = create<FormBuilderState>()(
       currentForm: null,
       loading: false,
       error: null,
+      notFound: false,
+      dirty: false,
       async loadForm(id) {
-        set({ loading: true, error: null });
+        set({ loading: true, error: null, notFound: false, dirty: false });
         try {
           const details = await getFormDetails(id);
-          set({ currentForm: details, loading: false });
+          set({ currentForm: details, loading: false, dirty: false });
         } catch (e: any) {
-          set({ error: e.message || 'Error cargando formulario', loading: false });
-        }
-      },
-      async addField(field) {
-        const form = get().currentForm;
-        if (!form) return null;
-        try {
-          const created = await addFormField(form.id, field);
-          set({ currentForm: { ...form, fields: [...form.fields, created] } });
-          return created;
-        } catch (e) {
-          set({ error: (e as any).message || 'Error agregando campo' });
-          return null;
-        }
-      },
-      async updateField(fieldId, data) {
-        const form = get().currentForm;
-        if (!form) return null;
-        try {
-          const updated = await updateFormField(form.id, fieldId, data);
-          set({
-            currentForm: {
-              ...form,
-              fields: form.fields.map(f => (f.id === fieldId ? updated : f)),
-            },
-          });
-          return updated;
-        } catch (e) {
-          set({ error: (e as any).message || 'Error actualizando campo' });
-          return null;
-        }
-      },
-      async removeField(fieldId) {
-        const form = get().currentForm;
-        if (!form) return false;
-        try {
-          await deleteFormField(form.id, fieldId);
-          set({ currentForm: { ...form, fields: form.fields.filter(f => f.id !== fieldId) } });
-          return true;
-        } catch (e) {
-          set({ error: (e as any).message || 'Error eliminando campo' });
-          return false;
-        }
-      },
-      async reorderFields(orderedIds) {
-        const form = get().currentForm;
-        if (!form) return null;
-        try {
-          const reordered = await reorderFormFields(form.id, orderedIds);
-          set({ currentForm: { ...form, fields: reordered } });
-          return reordered;
-        } catch (e) {
-          set({ error: (e as any).message || 'Error reordenando campos' });
-          return null;
+          if (e.code === 'NOT_FOUND' || e.message === 'NOT_FOUND') {
+            set({ notFound: true, loading: false, currentForm: null, dirty: false });
+          } else {
+            set({ error: e.message || 'Error cargando formulario', loading: false });
+          }
         }
       },
       async replaceSchema(schema) {
@@ -98,7 +47,7 @@ export const useFormBuilderStore = create<FormBuilderState>()(
         if (!form) return null;
         try {
           const replaced = await replaceFormSchema(form.id, schema);
-          set({ currentForm: replaced });
+          set({ currentForm: replaced, dirty: false });
           return replaced;
         } catch (e) {
           set({ error: (e as any).message || 'Error reemplazando schema' });
@@ -108,8 +57,10 @@ export const useFormBuilderStore = create<FormBuilderState>()(
       setLocalFields(fields) {
         const form = get().currentForm;
         if (!form) return;
-        set({ currentForm: { ...form, fields } });
+        set({ currentForm: { ...form, fields }, dirty: true });
       },
+      resetError() { set({ error: null }); },
+      resetDirty() { set({ dirty: false }); },
     }),
     { name: 'form-builder-store' }
   )

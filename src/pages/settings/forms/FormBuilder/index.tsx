@@ -1,162 +1,54 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 
-import { v4 as uuidv4 } from 'uuid';
+import { useFormBuilderStore } from '@/state/formBuilder.store';
 
-import type {
-  DragEndEvent,
-  DragStartEvent,
-} from '@dnd-kit/core';
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
-
-import { FieldEditor } from './FieldEditor';
-import { FormBuilderCanvas } from './FormBuilderCanvas';
-import { FormBuilderSidebar } from './FormBuilderSidebar';
-import type {
-  DraggableComponentType,
-  FormField,
-} from './types';
-import { COMPONENT_TYPES } from './types';
+import { FormBuilderView } from './FormBuilderView';
 
 interface FormBuilderProps {
-  initialFields?: FormField[];
-  onChange?: (fields: FormField[]) => void;
+  formId: string; // Identificador del formulario a editar
 }
 
-export function FormBuilder({ initialFields = [], onChange }: FormBuilderProps) {
-  const [fields, setFields] = useState<FormField[]>(initialFields);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [editingField, setEditingField] = useState<FormField | null>(null);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+export function FormBuilder({ formId }: FormBuilderProps) {
+  const { loadForm, loading, error, notFound, resetError } = useFormBuilderStore();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
+  useEffect(() => { loadForm(formId); }, [formId, loadForm]);
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
-
-    if (!over) return;
-
-    // Si es un nuevo componente desde el sidebar
-    if (active.data.current && 'type' in active.data.current) {
-      const componentData = active.data.current as DraggableComponentType;
-      
-      const newField: FormField = {
-        id: uuidv4(),
-        name: null,
-        label: `Nuevo ${componentData.label}`,
-        type: componentData.type,
-        required: false,
-        hidden: false,
-        placeholder: null,
-        colSpan: 12, // Ancho completo por defecto
-        options: null,
-        dataSource: null,
-        searchable: false,
-      };
-
-      // Si es select o radio, agregar opciones por defecto
-      if (componentData.type === 'select' || componentData.type === 'radio') {
-        newField.options = [
-          { label: 'Opción 1', value: 'option1' },
-          { label: 'Opción 2', value: 'option2' },
-        ];
-      }
-
-      // Si es botón, configurar valores por defecto
-      if (componentData.type === 'button') {
-        newField.buttonVariant = 'default';
-        newField.buttonAction = 'submit';
-        newField.buttonAlign = 'center';
-        newField.label = 'Enviar';
-      }
-
-      const newFields = [...fields, newField];
-      setFields(newFields);
-      onChange?.(newFields);
-      return;
-    }
-
-    // Si es reordenamiento de campos existentes
-    if (active.id !== over.id) {
-      const oldIndex = fields.findIndex((f) => f.id === active.id);
-      const newIndex = fields.findIndex((f) => f.id === over.id);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newFields = arrayMove(fields, oldIndex, newIndex);
-        setFields(newFields);
-        onChange?.(newFields);
-      }
-    }
-  };
-
-  const handleEditField = (field: FormField) => {
-    setEditingField(field);
-    setIsEditorOpen(true);
-  };
-
-  const handleSaveField = (updatedField: FormField) => {
-    const newFields = fields.map((f) =>
-      f.id === updatedField.id ? updatedField : f
+  if (loading) {
+    return (
+      <div className="p-6 text-sm text-muted-foreground animate-pulse">
+        Cargando formulario...
+      </div>
     );
-    setFields(newFields);
-    onChange?.(newFields);
-  };
+  }
 
-  const handleDeleteField = (id: string) => {
-    const newFields = fields.filter((f) => f.id !== id);
-    setFields(newFields);
-    onChange?.(newFields);
-  };
+  if (notFound) {
+    return (
+      <div className="p-8 border rounded-md bg-muted/30 flex flex-col gap-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-1">Formulario no encontrado</h3>
+          <p className="text-sm text-muted-foreground">El identificador "{formId}" no corresponde a un formulario existente. Puedes crear uno nuevo o volver al listado.</p>
+        </div>
+        <div className="flex gap-2">
+          {/* Botones de acción reales se podrían agregar aquí */}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full overflow-hidden border rounded-lg">
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <FormBuilderSidebar components={COMPONENT_TYPES} />
-        <FormBuilderCanvas
-          fields={fields}
-          onEditField={handleEditField}
-          onDeleteField={handleDeleteField}
-        />
-
-        <DragOverlay>
-          {activeId ? (
-            <div className="bg-card border rounded-lg p-4 shadow-lg">
-              Arrastrando...
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-
-      <FieldEditor
-        field={editingField}
-        isOpen={isEditorOpen}
-        onClose={() => {
-          setIsEditorOpen(false);
-          setEditingField(null);
-        }}
-        onSave={handleSaveField}
-      />
+    <div className="relative border rounded-lg">
+      {error && (
+        <div className="absolute top-2 right-2 text-xs bg-destructive text-destructive-foreground px-2 py-1 rounded">
+          {error}
+          <button
+            className="ml-2 underline"
+            onClick={() => resetError()}
+          >
+            ocultar
+          </button>
+        </div>
+      )}
+      <FormBuilderView />
     </div>
   );
 }

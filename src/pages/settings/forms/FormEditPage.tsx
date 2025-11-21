@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 
 import {
   ArrowLeft,
@@ -18,6 +21,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import { useFormBuilderStore } from '@/state/formBuilder.store';
 
 import { FormBuilder } from './FormBuilder';
 import { FormPreview } from './FormBuilder/FormPreview';
@@ -29,8 +33,15 @@ import type {
 export function FormEditPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [fields, setFields] = useState<FormField[]>([]);
+  const { currentForm, replaceSchema, dirty } = useFormBuilderStore();
   const [formTitle, setFormTitle] = useState('Formulario sin título');
+
+  // Sincronizar el título local cuando cargue el formulario
+  useEffect(() => {
+    if (currentForm?.title) {
+      setFormTitle(currentForm.title);
+    }
+  }, [currentForm?.title]);
 
   // Función para limpiar el JSON eliminando propiedades innecesarias
   const cleanFieldForSave = (field: FormField) => {
@@ -92,22 +103,26 @@ export function FormEditPage() {
     return cleaned;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!currentForm) return;
+    const fields = currentForm.fields || [];
     const cleanedFields = fields.map(cleanFieldForSave);
-    
-    const schema = {
-      title: formTitle,
+    const result = await replaceSchema({
+      title: formTitle.trim() || currentForm.title || 'Sin título',
+      description: currentForm.description,
       fields: cleanedFields,
-    };
-    
-    console.log('Schema guardado:', JSON.stringify(schema, null, 2));
-    alert('Formulario guardado exitosamente');
+    });
+    if (result) {
+      alert('Formulario guardado exitosamente');
+    } else {
+      alert('Error guardando el formulario');
+    }
   };
 
   const currentSchema: FormSchema = {
     title: formTitle,
-    description: 'Vista previa del formulario',
-    fields: fields,
+    description: currentForm?.description || 'Vista previa del formulario',
+    fields: currentForm?.fields || [],
   };
 
   return (
@@ -124,7 +139,7 @@ export function FormEditPage() {
           <h1 className="text-2xl font-bold">Editar Formulario {id}</h1>
         </div>
         
-        <Button onClick={handleSave}>
+          <Button onClick={handleSave} disabled={!currentForm || !dirty}>
           <Save className="h-4 w-4 mr-2" />
           Guardar
         </Button>
@@ -143,7 +158,7 @@ export function FormEditPage() {
         </TabsList>
 
         <TabsContent value="builder" className="flex-1 mt-4 mx-4 mb-4 overflow-hidden min-h-0">
-          <FormBuilder initialFields={fields} onChange={setFields} />
+          {id && <FormBuilder formId={id} />}
         </TabsContent>
 
         <TabsContent value="preview" className="flex-1 mt-4 mx-4 mb-4 overflow-hidden min-h-0 flex flex-col">

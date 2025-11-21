@@ -18,7 +18,11 @@ function ensureOk(res: Response, message: string) { if (!res.ok) throw new Error
 
 export async function getFormDetails(id: string): Promise<FormDetails> {
   const res = await fetch(`${BASE}/${id}/schema`);
-  if (res.status === 404) throw new Error('Formulario no encontrado');
+  if (res.status === 404) {
+    const err = new Error('NOT_FOUND');
+    (err as any).code = 'NOT_FOUND';
+    throw err;
+  }
   ensureOk(res, 'Error obteniendo detalles del formulario');
   return json<FormDetails>(res);
 }
@@ -36,7 +40,11 @@ export async function addFormField(formId: string, field: Omit<FormField, 'id'>)
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(field),
   });
-  if (res.status === 404) throw new Error('Formulario no encontrado');
+  if (res.status === 404) {
+    const err = new Error('NOT_FOUND');
+    (err as any).code = 'NOT_FOUND';
+    throw err;
+  }
   ensureOk(res, 'Error agregando campo');
   return json<FormField>(res);
 }
@@ -47,14 +55,22 @@ export async function updateFormField(formId: string, fieldId: string, data: Par
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (res.status === 404) throw new Error('Campo o formulario no encontrado');
+  if (res.status === 404) {
+    const err = new Error('NOT_FOUND');
+    (err as any).code = 'NOT_FOUND';
+    throw err;
+  }
   ensureOk(res, 'Error actualizando campo');
   return json<FormField>(res);
 }
 
 export async function deleteFormField(formId: string, fieldId: string): Promise<void> {
   const res = await fetch(`${BASE}/${formId}/fields/${fieldId}`, { method: 'DELETE' });
-  if (res.status === 404) throw new Error('Campo o formulario no encontrado');
+  if (res.status === 404) {
+    const err = new Error('NOT_FOUND');
+    (err as any).code = 'NOT_FOUND';
+    throw err;
+  }
   ensureOk(res, 'Error eliminando campo');
 }
 
@@ -64,7 +80,11 @@ export async function reorderFormFields(formId: string, orderedIds: string[]): P
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ order: orderedIds }),
   });
-  if (res.status === 404) throw new Error('Formulario no encontrado');
+  if (res.status === 404) {
+    const err = new Error('NOT_FOUND');
+    (err as any).code = 'NOT_FOUND';
+    throw err;
+  }
   ensureOk(res, 'Error reordenando campos');
   return json<FormField[]>(res);
 }
@@ -75,7 +95,11 @@ export async function replaceFormSchema(formId: string, schema: FormSchema): Pro
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(schema),
   });
-  if (res.status === 404) throw new Error('Formulario no encontrado');
+  if (res.status === 404) {
+    const err = new Error('NOT_FOUND');
+    (err as any).code = 'NOT_FOUND';
+    throw err;
+  }
   ensureOk(res, 'Error reemplazando schema');
   return json<FormDetails>(res);
 }

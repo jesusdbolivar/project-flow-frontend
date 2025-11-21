@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+  FolderKanban,
   Home,
   Settings2,
 } from 'lucide-react';
@@ -23,6 +24,11 @@ export const sidebarItems: SidebarItem[] = [
     title: "Dashboard",
     url: "/",
     icon: Home,
+  },
+  {
+    title: "Proyectos",
+    url: "/projects",
+    icon: FolderKanban,
   },
   {
     title: "Configuración",

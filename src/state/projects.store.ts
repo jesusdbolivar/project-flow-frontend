@@ -1,12 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type ProjectValue = string | number | boolean | null;
+
+export interface ProjectAttributes {
+  [key: string]: ProjectValue;
+}
+
 export interface Project {
   id: string;
   name: string;
   code?: string;
   description?: string;
   updatedAt: string;
+  attributes?: ProjectAttributes;
 }
 
 interface ProjectsState {

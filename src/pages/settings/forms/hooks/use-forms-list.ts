@@ -51,5 +51,10 @@ export function useFormsList() {
     setForms(prev => [form, ...prev]);
   }, []);
 
-  return { forms, loading, error, createForm: handleCreateForm, appendForm };
+  // Actualiza un formulario existente en la lista (por id)
+  const updateFormInList = useCallback((updated: FormSummary) => {
+    setForms(prev => prev.map(f => (f.id === updated.id ? updated : f)));
+  }, []);
+
+  return { forms, loading, error, createForm: handleCreateForm, appendForm, updateFormInList };
 }

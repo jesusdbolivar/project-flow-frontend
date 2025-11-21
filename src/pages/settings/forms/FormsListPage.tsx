@@ -3,14 +3,14 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { FormCard } from './components/FormCard';
+import { FormCreateModal } from './components/FormCreateModal';
 import { FormsHeader } from './components/FormsHeader';
 import { FormsStats } from './components/FormsStats';
-import { FormCreateModal } from './components/FormCreateModal';
 import { useFormsList } from './hooks/use-forms-list';
 
 export function FormsListPage() {
   const navigate = useNavigate();
-  const { forms, loading, error, appendForm } = useFormsList();
+  const { forms, loading, error, appendForm, updateFormInList } = useFormsList();
 
   const handleEdit = useCallback((id: string) => {
     navigate(`/settings/forms/${id}/edit`);
@@ -18,7 +18,7 @@ export function FormsListPage() {
 
   return (
     <div className="space-y-6">
-  <FormsHeader action={<FormCreateModal onCreated={appendForm} />} />
+    <FormsHeader action={<FormCreateModal onCreated={appendForm} />} />
 
       {loading && <p className="text-sm text-muted-foreground">Cargando...</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -26,7 +26,7 @@ export function FormsListPage() {
       {!loading && !error && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {forms.map(form => (
-            <FormCard key={form.id} form={form} onEdit={handleEdit} />
+            <FormCard key={form.id} form={form} onEdit={handleEdit} onUpdated={updateFormInList} />
           ))}
         </div>
       )}

@@ -82,36 +82,89 @@ Cualquier nueva funcionalidad en "Configuración" debe seguir esta estructura de
 - Usar **Barrel Files** (`index.ts`) en las carpetas de módulos para mantener limpios los imports.
 
 ### UI Components
-- Usar componentes de `@/components/ui` siempre que sea posible.
-- No crear estilos CSS manuales si Tailwind puede resolverlo.
-- Usar `className` con la utilidad `cn()` para mergear clases.
-
----
 
 ## 5. 🚀 Workflow para Añadir una Nueva Página
+### Endpoints (Separados por Dominio)
 
-Para que la IA implemente una nueva funcionalidad correctamente, debe seguir estos 4 pasos **en orden**:
+Forms (CRUD básico):
+- `GET /api/forms` → Lista de summaries `{ id, title, description, updatedAt }`.
+- `GET /api/forms/:id` → Summary individual.
+- `POST /api/forms` → Crear formulario (sin fields).
+- `PUT /api/forms/:id` → Actualizar meta (title/description).
+- `DELETE /api/forms/:id` → Eliminar formulario.
 
-1.  **Crear Archivos:** Crear la estructura en `src/pages/[modulo]/`.
-2.  **Exportar:** Agregar los exports en `src/pages/[modulo]/index.ts` y luego en `src/pages/settings/index.ts` (o `src/pages/index.ts`).
-3.  **Enrutar:** Agregar la definición de la ruta en `src/routes/index.tsx`.
-4.  **Navegación:** Agregar el item al menú en `src/config/sidebar.config.ts`.
+FormBuilder (estructura y campos):
+- `GET /api/forms/:id/schema` → Detalles completos (incluye `fields`).
+- `PUT /api/forms/:id/schema` → Reemplaza título, descripción y array completo de `fields`.
+- `GET /api/forms/:id/fields` → Lista sólo los campos.
+- `POST /api/forms/:id/fields` → Crear campo nuevo.
+- `PUT /api/forms/:formId/fields/:fieldId` → Actualizar campo existente.
+- `DELETE /api/forms/:formId/fields/:fieldId` → Eliminar campo.
+- `PATCH /api/forms/:id/fields/reorder` → Reordenar campos enviando `{ order: string[] }`.
 
 ---
-
-## 6. 📊 Estado Actual del Proyecto (Live Status)
-
-> **IA: Actualiza esta sección al terminar tus tareas.**
-
 - [x] **Layout Base:** Sidebar colapsable, Header, Responsive.
 - [x] **Dashboard:** Vista inicial con estadísticas estáticas.
+### Stores
+
+Separación aplicada:
+- `useFormsStore` → Sólo metadatos (id, title, description, updatedAt). No maneja campos.
+- `useFormBuilderStore` → Maneja `currentForm` (detalles + fields) y operaciones: `loadForm`, `addField`, `updateField`, `removeField`, `reorderFields`, `replaceSchema`, `setLocalFields`.
+
+Esto reduce acoplamiento y permite escalar validaciones y lógica específica del builder sin inflar el store de formularios global.
 - [x] **Módulo Forms:**
     - [x] Listado de formularios.
     - [x] Form Builder (Drag & Drop) funcional.
     - [x] Vista Previa (Preview) en tiempo real.
     - [x] Edición de propiedades de campos.
     - [x] Creación de formularios desde modal (título y descripción).
+    - [x] API Mock para Form Builder (CRUD de campos, reorder, schema completo).
 - [ ] **Módulo Users:** Pendiente de implementación.
-- [ ] **Backend Integration:** Actualmente usando MSW (Mocks).
+- [ ] **Backend Integration:** Actualmente usando MSW (Mocks). API real pendiente.
+
+---
+
+## 7. 🧩 API Form Builder (Contrato Mock Actual)
+
+Se agregó una capa de endpoints mock (MSW) para soportar operaciones del constructor de formularios. Estos endpoints facilitan migrar luego a un backend real sin cambiar la interfaz del front.
+
+### Endpoints
+
+- `GET /api/forms` ⇒ Lista de summaries `{ id, title, description, updatedAt }`.
+- `GET /api/forms/:id` ⇒ Summary individual.
+- `POST /api/forms` ⇒ Crear formulario.
+- `PUT /api/forms/:id` ⇒ Actualizar meta (title/description).
+- `DELETE /api/forms/:id` ⇒ Eliminar formulario.
+
+#### Builder específico
+- `GET /api/forms/:id/schema` ⇒ Detalles completos (incluye `fields`).
+- `PUT /api/forms/:id/schema` ⇒ Reemplaza título, descripción y array completo de `fields` (bulk).
+- `GET /api/forms/:id/fields` ⇒ Lista sólo los campos.
+- `POST /api/forms/:id/fields` ⇒ Crear campo nuevo.
+- `PUT /api/forms/:formId/fields/:fieldId` ⇒ Actualizar campo existente.
+- `DELETE /api/forms/:formId/fields/:fieldId` ⇒ Eliminar campo.
+- `PATCH /api/forms/:id/fields/reorder` ⇒ Reordenar campos enviando `{ order: string[] }`.
+
+### Tipos Clave
+`FormField` (en `src/pages/settings/forms/FormBuilder/types.ts`): define propiedades ricas para cada campo (layout, opciones, dataSource, validaciones, comportamiento de botones, etc.).
+
+`FormDetails` (servicio) = Summary + `fields: FormField[]`.
+
+### Store
+`useFormsStore` ahora incluye métodos remotos:
+- `loadFormRemote(formId)`
+- `remoteAddField(formId, field)`
+- `remoteUpdateField(formId, fieldId, data)`
+- `remoteRemoveField(formId, fieldId)`
+- `remoteReorderFields(formId, orderedIds)`
+
+Permite estrategias de actualización optimista o sincronización explícita con el backend mock.
+
+### Próximos Pasos Sugeridos
+1. Añadir validación con Zod para bodies antes de enviar (cliente) y en backend real.
+2. Incorporar control de versiones de formularios (versionado de schema).
+3. Endpoint de publicación: `POST /api/forms/:id/publish` que genera snapshot inmutable.
+4. Integrar caching y revalidación (React Query / TanStack Query) si se escala el consumo.
+5. Autorización: incluir encabezados y validación de roles para modificar formularios.
 
 ---

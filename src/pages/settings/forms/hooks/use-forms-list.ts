@@ -56,5 +56,10 @@ export function useFormsList() {
     setForms(prev => prev.map(f => (f.id === updated.id ? updated : f)));
   }, []);
 
-  return { forms, loading, error, createForm: handleCreateForm, appendForm, updateFormInList };
+  // Elimina un formulario por id de la lista
+  const removeFormInList = useCallback((id: string) => {
+    setForms(prev => prev.filter(f => f.id !== id));
+  }, []);
+
+  return { forms, loading, error, createForm: handleCreateForm, appendForm, updateFormInList, removeFormInList };
 }

@@ -6,18 +6,22 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import type { FormSummary } from '@/services/forms.api';
+
+import { FormDeleteModal } from './FormDeleteModal';
 import { FormEditModal } from './FormEditModal';
 
 interface FormCardProps {
   form: FormSummary;
   onEdit: (id: string) => void; // navegación al editor avanzado
   onUpdated?: (form: FormSummary) => void; // callback para actualizar lista tras edición rápida
+  onDeleted?: (id: string) => void; // callback para actualizar lista tras eliminación
 }
 
-export function FormCard({ form, onEdit, onUpdated }: FormCardProps) {
+export function FormCard({ form, onEdit, onUpdated, onDeleted }: FormCardProps) {
   return (
     <Card className="relative">
       <FormEditModal form={form} onUpdated={onUpdated} />
+      <FormDeleteModal form={form} onDeleted={onDeleted} />
       <CardHeader className="pr-10">{/* espacio para icono */}
         <CardTitle className="line-clamp-1">{form.title}</CardTitle>
         {form.description && (

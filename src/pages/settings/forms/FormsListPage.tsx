@@ -10,7 +10,7 @@ import { useFormsList } from './hooks/use-forms-list';
 
 export function FormsListPage() {
   const navigate = useNavigate();
-  const { forms, loading, error, appendForm, updateFormInList } = useFormsList();
+  const { forms, loading, error, appendForm, updateFormInList, removeFormInList } = useFormsList();
 
   const handleEdit = useCallback((id: string) => {
     navigate(`/settings/forms/${id}/edit`);
@@ -26,7 +26,13 @@ export function FormsListPage() {
       {!loading && !error && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {forms.map(form => (
-            <FormCard key={form.id} form={form} onEdit={handleEdit} onUpdated={updateFormInList} />
+            <FormCard
+              key={form.id}
+              form={form}
+              onEdit={handleEdit}
+              onUpdated={updateFormInList}
+              onDeleted={removeFormInList}
+            />
           ))}
         </div>
       )}

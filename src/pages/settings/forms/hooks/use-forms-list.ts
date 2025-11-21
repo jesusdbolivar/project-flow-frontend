@@ -36,15 +36,20 @@ export function useFormsList() {
     };
   }, []);
 
+  // Mantener la función original (creación rápida) por compatibilidad si se reutiliza en otro sitio
   const handleCreateForm = useCallback(async () => {
     try {
       const newForm = await createForm({ title: 'Nuevo formulario' });
       setForms(prev => [newForm, ...prev]);
     } catch (err) {
       console.error('Error creating form', err);
-      // Aquí se podría añadir un toast de error
     }
   }, []);
 
-  return { forms, loading, error, createForm: handleCreateForm };
+  // Nueva función para permitir que un modal u otro componente añada un formulario ya creado
+  const appendForm = useCallback((form: FormSummary) => {
+    setForms(prev => [form, ...prev]);
+  }, []);
+
+  return { forms, loading, error, createForm: handleCreateForm, appendForm };
 }

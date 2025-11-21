@@ -1,12 +1,10 @@
-import { Plus } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
+import type { ReactNode } from 'react';
 
 interface FormsHeaderProps {
-  onCreate: () => void;
+  action?: ReactNode;
 }
 
-export function FormsHeader({ onCreate }: FormsHeaderProps) {
+export function FormsHeader({ action }: FormsHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -15,10 +13,7 @@ export function FormsHeader({ onCreate }: FormsHeaderProps) {
           Gestiona y configura los formularios de tu aplicación
         </p>
       </div>
-      <Button onClick={onCreate}>
-        <Plus className="mr-2 h-4 w-4" />
-        Nuevo Formulario
-      </Button>
+      {action}
     </div>
   );
 }
